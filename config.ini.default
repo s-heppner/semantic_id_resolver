@@ -1,0 +1,6 @@
+[SERVICE]
+endpoint=http://127.0.0.1
+port=8125
+
+[RESOLVER]
+fallback_semantic_matching_service=https://example.org/semantic_matching_service
