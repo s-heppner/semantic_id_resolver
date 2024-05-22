@@ -78,7 +78,15 @@ if __name__ == '__main__':
         resolver.IRDISources.IEC_CDD: config["RESOLVER"]["cdd_semantic_matching_service"]
     }
 
-    RESOLVER = resolver.SemanticIdResolver(IRDI_MATCHER_DICT)
+    try:
+        DEBUG_ENDPOINTS = resolver.DebugSemanticMatchingServiceEndpoints.from_file(
+            config["RESOLVER"]["debug_semantic_matching_service_endpoints"]
+        )
+        print(f"USING DEBUG ENDPOINTS FROM {config["RESOLVER"]["debug_semantic_matching_service_endpoints"]}")
+    except FileNotFoundError:
+        DEBUG_ENDPOINTS = resolver.DebugSemanticMatchingServiceEndpoints(debug_endpoints={})
+
+    RESOLVER = resolver.SemanticIdResolver(IRDI_MATCHER_DICT, DEBUG_ENDPOINTS)
 
     SEMANTIC_ID_RESOLVING_SERVICE = SemanticIdResolvingService(
         endpoint=config["SERVICE"]["endpoint"],

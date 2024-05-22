@@ -1,13 +1,39 @@
 import enum
 from typing import Optional, Dict
 from urllib.parse import urlparse
+import json
 
 import dns.resolver
 
 
-def is_uri_not_iri(semantic_id: str) -> Optional[bool]:
+class DebugSemanticMatchingServiceEndpoints:
     """
-    :return: `True`, if `semantic_id` is a URI, False if it is an `IRI`, None for neither
+    This class adds the ability to set arbitrary Semantic Matching Service
+    Endpoints to overwrite whatever the DNS record would say.
+    In order to use it, you need to provide a JSON file with a Dict, mapping
+    a semantic ID directly to a Semantic Matching Service endpoint.
+
+    Note: This is not the base URL of the semanticID, rather the complete
+    semanticID string!
+    """
+    debug_endpoints: Dict[str, str]
+
+    def __init__(self, debug_endpoints: Dict[str, str]):
+        self.debug_endpoints = debug_endpoints
+
+    @classmethod
+    def from_file(cls, filename: str) -> "DebugSemanticMatchingServiceEndpoints":
+        with open(filename, "r") as file:
+            debug_endpoints = json.load(file)
+        return DebugSemanticMatchingServiceEndpoints(debug_endpoints)
+
+    def get_debug_endpoint(self, semantic_id: str) -> Optional[str]:
+        return self.debug_endpoints.get(semantic_id)
+
+
+def is_iri_not_irdi(semantic_id: str) -> Optional[bool]:
+    """
+    :return: `True`, if `semantic_id` is a IRI, False if it is an `IRDI`, None for neither
     """
     parsed_url = urlparse(semantic_id)
     # Check if the scheme is present, which indicates it's a URI
@@ -26,7 +52,7 @@ class IRDISources(enum.Enum):
     IEC_CDD = "IEC_CDD"
 
 
-def _uri_find_semantic_matching_service(semantic_id: str) -> Optional[str]:
+def _iri_find_semantic_matching_service(semantic_id: str) -> Optional[str]:
     # (2023-12-28, s-heppner)
     # Note, it is smart not to use a cache URI based semantic_ids,
     # so that you can use the built-in DNS cache of the machine you're running on.
@@ -58,9 +84,11 @@ def _uri_find_semantic_matching_service(semantic_id: str) -> Optional[str]:
 class SemanticIdResolver:
     def __init__(
             self,
-            irdi_matchers: Dict[IRDISources, str]
+            irdi_matchers: Dict[IRDISources, str],
+            debug_endpoints: DebugSemanticMatchingServiceEndpoints
     ):
         self.irdi_matchers: Dict[IRDISources, str] = irdi_matchers
+        self.debug_endpoints: DebugSemanticMatchingServiceEndpoints = debug_endpoints
 
     def find_semantic_matching_service(self, semantic_id: str) -> Optional[str]:
         """
@@ -69,9 +97,15 @@ class SemanticIdResolver:
         :param semantic_id:
         :return:
         """
-        if is_uri_not_iri(semantic_id) is True:
-            return _uri_find_semantic_matching_service(semantic_id)
-        elif is_uri_not_iri(semantic_id) is False:
+        # Check if there's a debug endpoint
+        debug_endpoint: Optional[str] = self.debug_endpoints.get_debug_endpoint(semantic_id=semantic_id)
+        if debug_endpoint is not None:
+            return debug_endpoint
+
+        # Check for IRI and IRDI
+        if is_iri_not_irdi(semantic_id) is True:
+            return _iri_find_semantic_matching_service(semantic_id)
+        elif is_iri_not_irdi(semantic_id) is False:
             return self._irdi_find_semantic_matching_service(semantic_id)
         else:
             return None
