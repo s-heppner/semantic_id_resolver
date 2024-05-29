@@ -63,7 +63,7 @@ class TestSemanticMatchingService(unittest.TestCase):
             semantic_id="foo://example.org:1234/over/there?name=bar#page=3",
         )
         response = requests.get(
-            "http://localhost:8125/get_semantic_matching_service",
+            "http://localhost:8000/get_semantic_matching_service",
             data=sms_request.model_dump_json()
         )
         self.assertEqual(
@@ -76,7 +76,7 @@ class TestSemanticMatchingService(unittest.TestCase):
             semantic_id="0173-1#01-ACK323#017",
         )
         response = requests.get(
-            "http://localhost:8125/get_semantic_matching_service",
+            "http://localhost:8000/get_semantic_matching_service",
             data=sms_request.model_dump_json()
         )
         self.assertEqual(
@@ -89,7 +89,7 @@ class TestSemanticMatchingService(unittest.TestCase):
             semantic_id="0112-1#01-ACK323#017",
         )
         response = requests.get(
-            "http://localhost:8125/get_semantic_matching_service",
+            "http://localhost:8000/get_semantic_matching_service",
             data=sms_request.model_dump_json()
         )
         self.assertEqual(
@@ -102,7 +102,7 @@ class TestSemanticMatchingService(unittest.TestCase):
             semantic_id="nothing",
         )
         response = requests.get(
-            "http://localhost:8125/get_semantic_matching_service",
+            "http://localhost:8000/get_semantic_matching_service",
             data=sms_request.model_dump_json()
         )
         self.assertEqual(
