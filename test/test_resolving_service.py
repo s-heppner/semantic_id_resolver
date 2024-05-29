@@ -43,6 +43,8 @@ def run_server():
 
     app = FastAPI()
     app.include_router(semantic_id_resolver_service.router)
+    print(str(config["SERVICE"]["ENDPOINT"]))
+    print(int(config["SERVICE"]["PORT"]))
     uvicorn.run(app, host=str(config["SERVICE"]["ENDPOINT"]), port=int(config["SERVICE"]["PORT"]), log_level="error")
 
 
