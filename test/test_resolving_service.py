@@ -11,6 +11,10 @@ import uvicorn
 from semantic_id_resolver import resolver
 from semantic_id_resolver.service import SemanticIdResolvingService, SMSRequest
 
+from contextlib import contextmanager
+import signal
+import time
+
 
 def run_server():
     # Load test configuration
@@ -46,84 +50,54 @@ def run_server():
     uvicorn.run(app, host=str(config["SERVICE"]["ENDPOINT"]), port=int(config["SERVICE"]["PORT"]), log_level="error")
 
 
+@contextmanager
+def run_server_context():
+    server_process = multiprocessing.Process(target=run_server)
+    server_process.start()
+    try:
+        time.sleep(2)  # Wait for the server to start
+        yield
+    finally:
+        server_process.terminate()
+        server_process.join(timeout=5)
+        if server_process.is_alive():
+            os.kill(server_process.pid, signal.SIGKILL)
+            server_process.join()
+
+
 class TestSemanticMatchingService(unittest.TestCase):
 
     def test_semantic_matching_service_iri(self):
-        # TODO deposit DNS record
-        server_process = multiprocessing.Process(target=run_server)
-        server_process.start()
-
-        sms_request = SMSRequest(
-            semantic_id="foo://example.org:1234/over/there?name=bar#page=3",
-        )
-        response = requests.get(
-            "http://localhost:8125/get_semantic_matching_service",
-            data=sms_request.model_dump_json()
-        )
-        self.assertEqual(
-            "https://example.org/fallback_semantic_matching_service",
-            response.json()["semantic_matching_service_endpoint"]
-        )
-
-        server_process.terminate()
-        server_process.join()
+        with run_server_context():
+            sms_request = SMSRequest(semantic_id="foo://example.org:1234/over/there?name=bar#page=3")
+            response = requests.get("http://localhost:8125/get_semantic_matching_service",
+                                    data=sms_request.model_dump_json())
+            self.assertEqual("https://example.org/fallback_semantic_matching_service",
+                             response.json()["semantic_matching_service_endpoint"])
 
     def test_semantic_matching_service_irdi_eclass(self):
-        server_process = multiprocessing.Process(target=run_server)
-        server_process.start()
-
-        sms_request = SMSRequest(
-            semantic_id="0173-1#01-ACK323#017",
-        )
-        response = requests.get(
-            "http://localhost:8125/get_semantic_matching_service",
-            data=sms_request.model_dump_json()
-        )
-        self.assertEqual(
-            "https://example.org/eclass_semantic_matching_service",
-            response.json()["semantic_matching_service_endpoint"]
-        )
-
-        server_process.terminate()
-        server_process.join()
+        with run_server_context():
+            sms_request = SMSRequest(semantic_id="0173-1#01-ACK323#017")
+            response = requests.get("http://localhost:8125/get_semantic_matching_service",
+                                    data=sms_request.model_dump_json())
+            self.assertEqual("https://example.org/eclass_semantic_matching_service",
+                             response.json()["semantic_matching_service_endpoint"])
 
     def test_semantic_matching_service_irdi_cdd(self):
-        server_process = multiprocessing.Process(target=run_server)
-        server_process.start()
-
-        sms_request = SMSRequest(
-            semantic_id="0112-1#01-ACK323#017",
-        )
-        response = requests.get(
-            "http://localhost:8125/get_semantic_matching_service",
-            data=sms_request.model_dump_json()
-        )
-        self.assertEqual(
-            "https://example.org/cdd_semantic_matching_service",
-            response.json()["semantic_matching_service_endpoint"]
-        )
-
-        server_process.terminate()
-        server_process.join()
+        with run_server_context():
+            sms_request = SMSRequest(semantic_id="0112-1#01-ACK323#017")
+            response = requests.get("http://localhost:8125/get_semantic_matching_service",
+                                    data=sms_request.model_dump_json())
+            self.assertEqual("https://example.org/cdd_semantic_matching_service",
+                             response.json()["semantic_matching_service_endpoint"])
 
     def test_semantic_matching_service_fallback(self):
-        server_process = multiprocessing.Process(target=run_server)
-        server_process.start()
-
-        sms_request = SMSRequest(
-            semantic_id="nothing",
-        )
-        response = requests.get(
-            "http://localhost:8125/get_semantic_matching_service",
-            data=sms_request.model_dump_json()
-        )
-        self.assertEqual(
-            "https://example.org/fallback_semantic_matching_service",
-            response.json()["semantic_matching_service_endpoint"]
-        )
-
-        server_process.terminate()
-        server_process.join()
+        with run_server_context():
+            sms_request = SMSRequest(semantic_id="nothing")
+            response = requests.get("http://localhost:8125/get_semantic_matching_service",
+                                    data=sms_request.model_dump_json())
+            self.assertEqual("https://example.org/fallback_semantic_matching_service",
+                             response.json()["semantic_matching_service_endpoint"])
 
     # TODO check debug endpoints
 
