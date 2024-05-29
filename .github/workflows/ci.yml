@@ -26,6 +26,7 @@ jobs:
 
   build_windows:
     runs-on: windows-latest
+    needs: [build_ubuntu] # Ensures build_windows runs after build_ubuntu
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
