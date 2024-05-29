@@ -57,7 +57,7 @@ class SemanticIdResolvingService:
             endpoint = found_endpoint
         return SMSResponse(
             semantic_matching_service_endpoint=endpoint,
-            meta_information={}  # Todo
+            meta_information={}  # TODO metainformation
         )
 
 
@@ -82,7 +82,7 @@ if __name__ == '__main__':
         DEBUG_ENDPOINTS = resolver.DebugSemanticMatchingServiceEndpoints.from_file(
             config["RESOLVER"]["debug_semantic_matching_service_endpoints"]
         )
-        print(f"USING DEBUG ENDPOINTS FROM {config["RESOLVER"]["debug_semantic_matching_service_endpoints"]}")
+        print(f"USING DEBUG ENDPOINTS FROM {config['RESOLVER']['debug_semantic_matching_service_endpoints']}")
     except FileNotFoundError:
         DEBUG_ENDPOINTS = resolver.DebugSemanticMatchingServiceEndpoints(debug_endpoints={})
 
@@ -97,4 +97,5 @@ if __name__ == '__main__':
     APP.include_router(
         SEMANTIC_ID_RESOLVING_SERVICE.router
     )
+    # TODO read host from config
     uvicorn.run(APP, host="127.0.0.1", port=int(config["SERVICE"]["PORT"]))

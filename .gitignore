@@ -5,6 +5,7 @@
 
 # Typical virtualenv dir
 /venv/
+/.venv/
 
 # IDE settings
 /.idea/

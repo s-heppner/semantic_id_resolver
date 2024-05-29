@@ -39,8 +39,8 @@ def is_iri_not_irdi(semantic_id: str) -> Optional[bool]:
     # Check if the scheme is present, which indicates it's a URI
     if parsed_url.scheme:
         return True
-    # Check if there is a colon in the netloc, which could indicate an IRI
-    elif ':' in parsed_url.netloc:
+    # TODO IRDI parser
+    elif "#" in parsed_url.fragment:
         return False
     # If neither condition is met, return None
     else:
@@ -103,9 +103,10 @@ class SemanticIdResolver:
             return debug_endpoint
 
         # Check for IRI and IRDI
-        if is_iri_not_irdi(semantic_id) is True:
+        is_iri = is_iri_not_irdi(semantic_id)
+        if is_iri is True:
             return _iri_find_semantic_matching_service(semantic_id)
-        elif is_iri_not_irdi(semantic_id) is False:
+        elif is_iri is False:
             return self._irdi_find_semantic_matching_service(semantic_id)
         else:
             return None
