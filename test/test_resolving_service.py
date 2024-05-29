@@ -68,36 +68,53 @@ def run_server_context():
 class TestSemanticMatchingService(unittest.TestCase):
 
     def test_semantic_matching_service_iri(self):
+        # TODO deposit DNS record
         with run_server_context():
             sms_request = SMSRequest(semantic_id="foo://example.org:1234/over/there?name=bar#page=3")
-            response = requests.get("http://localhost:8125/get_semantic_matching_service",
-                                    data=sms_request.model_dump_json())
-            self.assertEqual("https://example.org/fallback_semantic_matching_service",
-                             response.json()["semantic_matching_service_endpoint"])
+            response = requests.get(
+                "http://localhost:8125/get_semantic_matching_service",
+                data=sms_request.model_dump_json()
+            )
+            self.assertEqual(
+                "https://example.org/fallback_semantic_matching_service",
+                response.json()["semantic_matching_service_endpoint"]
+            )
 
     def test_semantic_matching_service_irdi_eclass(self):
         with run_server_context():
             sms_request = SMSRequest(semantic_id="0173-1#01-ACK323#017")
-            response = requests.get("http://localhost:8125/get_semantic_matching_service",
-                                    data=sms_request.model_dump_json())
-            self.assertEqual("https://example.org/eclass_semantic_matching_service",
-                             response.json()["semantic_matching_service_endpoint"])
+            response = requests.get(
+                "http://localhost:8125/get_semantic_matching_service",
+                data=sms_request.model_dump_json()
+            )
+            self.assertEqual(
+                "https://example.org/eclass_semantic_matching_service",
+                response.json()["semantic_matching_service_endpoint"]
+            )
 
     def test_semantic_matching_service_irdi_cdd(self):
         with run_server_context():
             sms_request = SMSRequest(semantic_id="0112-1#01-ACK323#017")
-            response = requests.get("http://localhost:8125/get_semantic_matching_service",
-                                    data=sms_request.model_dump_json())
-            self.assertEqual("https://example.org/cdd_semantic_matching_service",
-                             response.json()["semantic_matching_service_endpoint"])
+            response = requests.get(
+                "http://localhost:8125/get_semantic_matching_service",
+                data=sms_request.model_dump_json()
+            )
+            self.assertEqual(
+                "https://example.org/cdd_semantic_matching_service",
+                response.json()["semantic_matching_service_endpoint"]
+            )
 
     def test_semantic_matching_service_fallback(self):
         with run_server_context():
             sms_request = SMSRequest(semantic_id="nothing")
-            response = requests.get("http://localhost:8125/get_semantic_matching_service",
-                                    data=sms_request.model_dump_json())
-            self.assertEqual("https://example.org/fallback_semantic_matching_service",
-                             response.json()["semantic_matching_service_endpoint"])
+            response = requests.get(
+                "http://localhost:8125/get_semantic_matching_service",
+                data=sms_request.model_dump_json()
+            )
+            self.assertEqual(
+                "https://example.org/fallback_semantic_matching_service",
+                response.json()["semantic_matching_service_endpoint"]
+            )
 
     # TODO check debug endpoints
 
