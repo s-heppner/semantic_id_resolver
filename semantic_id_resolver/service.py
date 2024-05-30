@@ -82,7 +82,7 @@ if __name__ == '__main__':
         DEBUG_ENDPOINTS = resolver.DebugSemanticMatchingServiceEndpoints.from_file(
             config["RESOLVER"]["debug_semantic_matching_service_endpoints"]
         )
-        print(f"USING DEBUG ENDPOINTS FROM {config["RESOLVER"]["debug_semantic_matching_service_endpoints"]}")
+        print(f"USING DEBUG ENDPOINTS FROM {config['RESOLVER']['debug_semantic_matching_service_endpoints']}")
     except FileNotFoundError:
         DEBUG_ENDPOINTS = resolver.DebugSemanticMatchingServiceEndpoints(debug_endpoints={})
 
