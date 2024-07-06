@@ -82,7 +82,7 @@ class TestSemanticMatchingService(unittest.TestCase):
 
     def test_semantic_matching_service_irdi_eclass(self):
         with run_server_context():
-            sms_request = SMSRequest(semantic_id="0173-1#01-ACK323#017")
+            sms_request = SMSRequest(semantic_id="0173-0001#01-ACK323#7")
             response = requests.get(
                 "http://localhost:8125/get_semantic_matching_service",
                 data=sms_request.model_dump_json()
@@ -94,7 +94,7 @@ class TestSemanticMatchingService(unittest.TestCase):
 
     def test_semantic_matching_service_irdi_cdd(self):
         with run_server_context():
-            sms_request = SMSRequest(semantic_id="0112-1#01-ACK323#017")
+            sms_request = SMSRequest(semantic_id="0112-0001#01-ACK323#7")
             response = requests.get(
                 "http://localhost:8125/get_semantic_matching_service",
                 data=sms_request.model_dump_json()

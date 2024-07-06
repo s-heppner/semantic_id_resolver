@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 import json
 
 import dns.resolver
+from parser.irdi_parser import IRDIParser
 
 
 class DebugSemanticMatchingServiceEndpoints:
@@ -33,18 +34,20 @@ class DebugSemanticMatchingServiceEndpoints:
 
 def is_iri_not_irdi(semantic_id: str) -> Optional[bool]:
     """
-    :return: `True`, if `semantic_id` is a IRI, False if it is an `IRDI`, None for neither
+    :return: `True`, if `semantic_id` is an IRI, False if it is an IRDI, None for neither
     """
+    # Check IRDI
+    try:
+        IRDIParser().parse(semantic_id)
+        return False
+    except ValueError:
+        pass
+    # Check IRI
     parsed_url = urlparse(semantic_id)
-    # Check if the scheme is present, which indicates it's a URI
     if parsed_url.scheme:
         return True
-    # TODO IRDI parser
-    elif "#" in parsed_url.fragment:
-        return False
-    # If neither condition is met, return None
-    else:
-        return None
+    # Not IRDI or IRI
+    return None
 
 
 class IRDISources(enum.Enum):
