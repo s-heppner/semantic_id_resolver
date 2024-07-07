@@ -128,7 +128,17 @@ class TestSemanticMatchingService(unittest.TestCase):
                 response.json()["semantic_matching_service_endpoint"]
             )
 
-    # TODO check debug endpoints
+    def test_semantic_matching_service_debug(self):
+        with run_server_context():
+            sms_request = SMSRequest(semantic_id="https://example.org/semanticIDone")
+            response = requests.get(
+                "http://localhost:8125/get_semantic_matching_service",
+                data=sms_request.model_dump_json()
+            )
+            self.assertEqual(
+                "https://example.org/debug_semantic_matching_service",
+                response.json()["semantic_matching_service_endpoint"]
+            )
 
 
 if __name__ == '__main__':

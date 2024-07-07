@@ -57,7 +57,7 @@ class SemanticIdResolvingService:
             endpoint = found_endpoint
         return SMSResponse(
             semantic_matching_service_endpoint=endpoint,
-            meta_information={}  # TODO metainformation
+            meta_information={}
         )
 
 
@@ -97,5 +97,4 @@ if __name__ == '__main__':
     APP.include_router(
         SEMANTIC_ID_RESOLVING_SERVICE.router
     )
-    # TODO read host from config
     uvicorn.run(APP, host="127.0.0.1", port=int(config["SERVICE"]["PORT"]))
