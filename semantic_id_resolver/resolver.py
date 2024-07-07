@@ -71,6 +71,7 @@ def _iri_find_semantic_matching_service(semantic_id: str) -> Optional[str]:
                 try:
                     semantic_matcher_endpoint = semantic_matcher_record.split(": ")[-1]
                     return semantic_matcher_endpoint
+                # ToDo What happens if we have several services here?
                 except Exception as e:
                     print(f"Cannot parse TXT record {semantic_matcher_record} for {domain}: {e}")
                     return None

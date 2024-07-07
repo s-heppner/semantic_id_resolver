@@ -2,6 +2,8 @@ import os
 import configparser
 from typing import Dict
 import multiprocessing
+
+import dns
 import requests
 import unittest
 
@@ -45,6 +47,17 @@ def run_server():
         semantic_id_resolver=mock_resolver
     )
 
+    # Mock TXT record
+    class MockTXTRecord:
+        def __init__(self, strings):
+            self.strings = strings
+
+    # Mock DNS resolving manually, mock for unittest does not work in this context
+    def mock_dns_resolver_resolve(qname, rdtype):
+        return [MockTXTRecord([b"semantic_matcher: https://example.org/iri_semantic_matching_service"])]
+    dns.resolver.resolve = mock_dns_resolver_resolve
+
+    # Run server
     app = FastAPI()
     app.include_router(semantic_id_resolver_service.router)
     uvicorn.run(app, host=str(config["SERVICE"]["ENDPOINT"]), port=int(config["SERVICE"]["PORT"]), log_level="error")
@@ -68,7 +81,6 @@ def run_server_context():
 class TestSemanticMatchingService(unittest.TestCase):
 
     def test_semantic_matching_service_iri(self):
-        # TODO deposit DNS record
         with run_server_context():
             sms_request = SMSRequest(semantic_id="foo://example.org:1234/over/there?name=bar#page=3")
             response = requests.get(
@@ -76,7 +88,7 @@ class TestSemanticMatchingService(unittest.TestCase):
                 data=sms_request.model_dump_json()
             )
             self.assertEqual(
-                "https://example.org/fallback_semantic_matching_service",
+                "https://example.org/iri_semantic_matching_service",
                 response.json()["semantic_matching_service_endpoint"]
             )
 
