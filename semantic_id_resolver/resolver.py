@@ -1,4 +1,5 @@
 import enum
+from pathlib import Path
 from typing import Optional, Dict
 from urllib.parse import urlparse
 import json
@@ -24,7 +25,9 @@ class DebugSemanticMatchingServiceEndpoints:
 
     @classmethod
     def from_file(cls, filename: str) -> "DebugSemanticMatchingServiceEndpoints":
-        with open(filename, "r") as file:
+        base_dir = str(Path(__file__).resolve().parent.parent)
+        resource_path = base_dir + "/" + filename
+        with open(resource_path, "r") as file:
             debug_endpoints = json.load(file)
         return DebugSemanticMatchingServiceEndpoints(debug_endpoints)
 
