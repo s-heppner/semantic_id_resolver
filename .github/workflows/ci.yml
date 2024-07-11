@@ -1,9 +1,6 @@
 name: test
 
-on:
-  push:
-    branches:
-      - wip/testing
+on: [push, pull_request]
 
 jobs:
   build:
