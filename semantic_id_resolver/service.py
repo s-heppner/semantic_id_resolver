@@ -57,7 +57,7 @@ class SemanticIdResolvingService:
             endpoint = found_endpoint
         return SMSResponse(
             semantic_matching_service_endpoint=endpoint,
-            meta_information={}  # Todo
+            meta_information={}
         )
 
 

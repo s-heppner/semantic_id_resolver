@@ -1,9 +1,11 @@
 import enum
+from pathlib import Path
 from typing import Optional, Dict
 from urllib.parse import urlparse
 import json
 
 import dns.resolver
+from parser.irdi_parser import IRDIParser
 
 
 class DebugSemanticMatchingServiceEndpoints:
@@ -23,7 +25,9 @@ class DebugSemanticMatchingServiceEndpoints:
 
     @classmethod
     def from_file(cls, filename: str) -> "DebugSemanticMatchingServiceEndpoints":
-        with open(filename, "r") as file:
+        base_dir = str(Path(__file__).resolve().parent.parent)
+        resource_path = base_dir + "/" + filename
+        with open(resource_path, "r") as file:
             debug_endpoints = json.load(file)
         return DebugSemanticMatchingServiceEndpoints(debug_endpoints)
 
@@ -33,18 +37,20 @@ class DebugSemanticMatchingServiceEndpoints:
 
 def is_iri_not_irdi(semantic_id: str) -> Optional[bool]:
     """
-    :return: `True`, if `semantic_id` is a IRI, False if it is an `IRDI`, None for neither
+    :return: `True`, if `semantic_id` is an IRI, False if it is an IRDI, None for neither
     """
+    # Check IRDI
+    try:
+        IRDIParser().parse(semantic_id)
+        return False
+    except ValueError:
+        pass
+    # Check IRI
     parsed_url = urlparse(semantic_id)
-    # Check if the scheme is present, which indicates it's a URI
     if parsed_url.scheme:
         return True
-    # Check if there is a colon in the netloc, which could indicate an IRI
-    elif ':' in parsed_url.netloc:
-        return False
-    # If neither condition is met, return None
-    else:
-        return None
+    # Not IRDI or IRI
+    return None
 
 
 class IRDISources(enum.Enum):
@@ -103,9 +109,10 @@ class SemanticIdResolver:
             return debug_endpoint
 
         # Check for IRI and IRDI
-        if is_iri_not_irdi(semantic_id) is True:
+        is_iri = is_iri_not_irdi(semantic_id)
+        if is_iri is True:
             return _iri_find_semantic_matching_service(semantic_id)
-        elif is_iri_not_irdi(semantic_id) is False:
+        elif is_iri is False:
             return self._irdi_find_semantic_matching_service(semantic_id)
         else:
             return None
