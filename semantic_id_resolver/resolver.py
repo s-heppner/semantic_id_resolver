@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Optional, Dict
 from urllib.parse import urlparse
 import json
+import re
 
 import dns.resolver
-from parser.irdi_parser import IRDIParser
 
 
 class DebugSemanticMatchingServiceEndpoints:
@@ -35,16 +35,39 @@ class DebugSemanticMatchingServiceEndpoints:
         return self.debug_endpoints.get(semantic_id)
 
 
+def matches_irdi(s: str) -> bool:
+    # (2024-09-11, s-heppner)
+    # This pattern stems from the wonderful IRDI-Parser project:
+    # https://github.com/moritzsommer/irdi-parser
+    # Sadly, we had problems with Docker installing and finding the package, so we decided to eliminate the dependency.
+    irdi_pattern = re.compile(
+        # International Code Designator (4 digits)
+        r'^(?P<icd>\d{4})-'
+        # Organization Identifier (4 safe characters)
+        r'(?P<org_id>[a-zA-Z0-9]{4})'
+        # Optional Additional Information (4 safe characters)
+        r'(-(?P<add_info>[a-zA-Z0-9]{4}))?'
+        # Separator Character
+        r'#'
+        # Code Space Identifier (2 safe characters)
+        r'(?P<csi>[a-zA-Z0-9]{2})-'
+        # Item Code (6 safe characters)
+        r'(?P<item_code>[a-zA-Z0-9]{6})'
+        # Separator Character
+        r'#'
+        # Version Identifier (1 digit)
+        r'(?P<version>\d)$'
+    )
+    return bool(irdi_pattern.match(s))
+
+
 def is_iri_not_irdi(semantic_id: str) -> Optional[bool]:
     """
     :return: `True`, if `semantic_id` is an IRI, False if it is an IRDI, None for neither
     """
     # Check IRDI
-    try:
-        IRDIParser().parse(semantic_id)
+    if matches_irdi(semantic_id):
         return False
-    except ValueError:
-        pass
     # Check IRI
     parsed_url = urlparse(semantic_id)
     if parsed_url.scheme:
