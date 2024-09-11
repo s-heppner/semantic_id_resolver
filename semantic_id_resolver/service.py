@@ -97,4 +97,4 @@ if __name__ == '__main__':
     APP.include_router(
         SEMANTIC_ID_RESOLVING_SERVICE.router
     )
-    uvicorn.run(APP, host="127.0.0.1", port=int(config["SERVICE"]["PORT"]))
+    uvicorn.run(APP, host=config["SERVICE"]["LISTEN_ADDRESS"], port=int(config["SERVICE"]["PORT"]))
