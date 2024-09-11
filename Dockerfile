@@ -20,4 +20,4 @@ ENV PYTHONPATH=/app
 EXPOSE 8125
 
 # Command to run the FastAPI server
-CMD ["python", "resolver_modules/service.py"]
+CMD ["python", "semantic_id_resolver/service.py"]
